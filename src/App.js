@@ -4,12 +4,13 @@ import SliderWithInput from './components/SliderWithInput';
 import ContainerSVG from './components/ContainerSVG';
 import Cylinder from './components/Cylinder'; // Import the new Cylinder component
 
+
 function App() {
   const [volume, setVolume] = useState(1000);
   const [height, setHeight] = useState(100);
   const [diameter, setDiameter] = useState(112.8);
-  const [strokeWidth, setStrokeWidth] = useState(1);
-  const [thickness, setThickness] = useState(5); // Add this state for cylinder thickness
+  const [thickness, setThickness] = useState(1); // Combined thickness state
+  const [activeView, setActiveView] = useState('3D'); // '3D' or '2D'
 
   const updateFromVolume = (newVolume) => {
     const oldVolume = (Math.PI * Math.pow(diameter / 20, 2) * height / 10);
@@ -36,22 +37,29 @@ function App() {
     setDiameter(newDiameter);
   };
 
+  const toggleView = () => {
+    setActiveView(prevView => prevView === '3D' ? '2D' : '3D');
+  };
+
   return (
     <div className="App">
       <div className="container">
         <div className="visualization-container">
-          <div className="svg-container">
-            <ContainerSVG height={height} diameter={diameter} strokeWidth={strokeWidth} />
-          </div>
-          <div className="three-d-container">
-            <Cylinder 
-              diameter={diameter} 
-              height={height} 
-              thickness={thickness} 
-              width={300} 
-              canvasHeight={300}
-            />
-          </div>
+          {activeView === '3D' ? (
+            <div className="three-d-container">
+              {console.log('Rendering 3D view', { diameter, height, thickness })}
+              <Cylinder 
+                diameter={diameter} 
+                height={height} 
+                thickness={thickness}
+              />
+            </div>
+          ) : (
+            <div className="svg-container">
+              {console.log('Rendering 2D view')}
+              <ContainerSVG height={height} diameter={diameter} strokeWidth={thickness} />
+            </div>
+          )}
         </div>
         <div className="controls">
           <SliderWithInput
@@ -79,23 +87,26 @@ function App() {
             onChange={updateHeightFromDiameter}
           />
           <SliderWithInput
-            id="strokeWidth"
-            label="Stroke Width (mm)"
-            min={0.1}
-            max={10}
-            step={0.1}
-            value={strokeWidth}
-            onChange={setStrokeWidth}
-          />
-          <SliderWithInput
             id="thickness"
             label="Thickness (mm)"
-            min={1}
-            max={20}
+            min={0.1}
+            max={10}
             step={0.1}
             value={thickness}
             onChange={setThickness}
           />
+          <div className="switch-container">
+            <span className={`switch-label ${activeView === '2D' ? 'active' : ''}`}>2D</span>
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={activeView === '3D'}
+                onChange={toggleView}
+              />
+              <span className="slider round"></span>
+            </label>
+            <span className={`switch-label ${activeView === '3D' ? 'active' : ''}`}>3D</span>
+          </div>
         </div>
       </div>
     </div>

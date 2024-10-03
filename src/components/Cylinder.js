@@ -1,65 +1,82 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
-import { CSG } from 'three-csg-ts';
 
-const Cylinder = ({ diameter, height, thickness, width, canvasHeight }) => {
+const Cylinder = ({ diameter, height, thickness }) => {
   const mountRef = useRef(null);
+  const rendererRef = useRef(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log('Cylinder component effect running');
     const mount = mountRef.current;
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, width / canvasHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true }); // Enable alpha (transparency)
-    renderer.setSize(width, canvasHeight);
-    renderer.setClearColor(0x000000, 0); // Set clear color to transparent
-    renderer.shadowMap.enabled = true; // Enable shadow mapping
-    mount.appendChild(renderer.domElement);
+    if (!mount) {
+      console.error('Mount ref is null');
+      return;
+    }
 
-    // Create the outer cylinder (body of the mug)
-    const outerGeometry = new THREE.CylinderGeometry(diameter / 2, diameter / 2, height, 32);
-    const outerMesh = new THREE.Mesh(outerGeometry);
-    
-    // Create the inner cylinder (hollow part of the mug) with a shorter height
-    const innerHeight = height + thickness; // Shorten the inner cylinder
-    const innerGeometry = new THREE.CylinderGeometry((diameter / 2) - thickness, (diameter / 2) - thickness, innerHeight, 32);
-    const innerMesh = new THREE.Mesh(innerGeometry);
-    innerGeometry.translate(0, thickness, 0);
+    console.log('Mount dimensions:', mount.clientWidth, mount.clientHeight);
 
-    // Use CSG to subtract the inner cylinder from the outer cylinder
-    const subtractedMesh = CSG.subtract(outerMesh, innerMesh);
-    const mugMaterial = new THREE.MeshStandardMaterial({ color: 0xEBA583 });
-    const mugMesh = new THREE.Mesh(subtractedMesh.geometry, mugMaterial);
-    scene.add(mugMesh);
+    let scene, camera, renderer;
 
-    // Add a directional light to illuminate the solid surfaces
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(height * 2, height, 5).normalize();
-    scene.add(directionalLight);
+    try {
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(75, mount.clientWidth / mount.clientHeight, 0.1, 1000);
 
-    // Add ambient light to brighten the scene
-    const ambientLight = new THREE.AmbientLight(0x404040); // Soft white light
-    scene.add(ambientLight);
+      if (!rendererRef.current) {
+        renderer = new THREE.WebGLRenderer({ alpha: true });
+        rendererRef.current = renderer;
+      } else {
+        renderer = rendererRef.current;
+      }
 
-    // Position the camera outside the cylinder
-    camera.position.z = diameter * 1.5;
-    camera.position.y = height * 1.5; // Adjust the camera height to better view the mug
+      renderer.setSize(mount.clientWidth, mount.clientHeight);
+      mount.appendChild(renderer.domElement);
 
-    // Point the camera at the center of the mug
-    camera.lookAt(mugMesh.position);
+      console.log('Scene, camera, and renderer created');
 
-    const animate = () => {
-      requestAnimationFrame(animate);
-      mugMesh.rotation.y += 0.01; // Add rotation to the mug
-      renderer.render(scene, camera);
-    };
-    animate();
+      // Create a simple cylinder for testing
+      const geometry = new THREE.CylinderGeometry(diameter / 2, diameter / 2, height, 32);
+      const material = new THREE.MeshBasicMaterial({ color: 0xEBA583 });
+      const cylinder = new THREE.Mesh(geometry, material);
+      scene.add(cylinder);
+
+      console.log('Cylinder added to scene');
+
+      // Position camera
+      camera.position.z = Math.max(diameter, height) * 1.5;
+      camera.position.y = height / 2;
+      camera.lookAt(scene.position);
+
+      console.log('Camera positioned');
+
+      const animate = () => {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      };
+      animate();
+
+      console.log('Animation loop started');
+    } catch (err) {
+      console.error('Error in Cylinder component:', err);
+      setError(err.message);
+    }
 
     return () => {
-      mount.removeChild(renderer.domElement);
+      console.log('Cleanup function called');
+      if (renderer && mount.contains(renderer.domElement)) {
+        mount.removeChild(renderer.domElement);
+      }
+      if (scene) {
+        scene.clear();
+      }
     };
-  }, [diameter, height, thickness, width, canvasHeight]);
+  }, [diameter, height, thickness]);
 
-  return <div ref={mountRef} />;
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  return <div ref={mountRef} style={{ width: '100%', height: '100%' }} />;
 };
 
 export default Cylinder;
