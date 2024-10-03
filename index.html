@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cylindrical Container Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: inline-block;
+            width: 120px;
+        }
+        input[type="number"], input[type="range"] {
+            width: 200px;
+        }
+        #container {
+           
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cylindrical Container Calculator</h1>
+    <div class="input-group">
+        <label for="volume">Volume (cm³):</label>
+        <input type="number" id="volume" min="1" value="1000">
+    </div>
+    <div class="input-group">
+        <label for="height">Height (mm):</label>
+        <input type="range" id="height" min="10" max="1000" value="100">
+        <span id="heightValue">100</span>
+    </div>
+    <div class="input-group">
+        <label for="diameter">Diameter (mm):</label>
+        <input type="range" id="diameter" min="10" max="1000" value="112.8">
+        <span id="diameterValue">112.8</span>
+    </div>
+    <div class="input-group">
+        <label for="strokeWidth">Stroke Width (mm):</label>
+        <input type="range" id="strokeWidth" min="0.1" max="10" step="0.1" value="1">
+        <span id="strokeWidthValue">1</span>
+    </div>
+    <svg id="container" width="300" height="300"></svg>
+
+    <script>
+        const volumeInput = document.getElementById('volume');
+        const heightSlider = document.getElementById('height');
+        const diameterSlider = document.getElementById('diameter');
+        const strokeWidthSlider = document.getElementById('strokeWidth');
+        const heightValue = document.getElementById('heightValue');
+        const diameterValue = document.getElementById('diameterValue');
+        const strokeWidthValue = document.getElementById('strokeWidthValue');
+        const svg = document.getElementById('container');
+
+        function updateContainer() {
+            const volume = parseFloat(volumeInput.value);
+            const heightMm = parseFloat(heightSlider.value);
+            const diameterMm = parseFloat(diameterSlider.value);
+
+            // Convert mm to cm for calculations
+            const height = heightMm / 10;
+            const diameter = diameterMm / 10;
+
+            if (this === heightSlider) {
+                const newDiameter = Math.sqrt((4 * volume) / (Math.PI * height)) * 10;
+                diameterSlider.value = newDiameter.toFixed(1);
+            } else if (this === diameterSlider) {
+                const newHeight = ((4 * volume) / (Math.PI * diameter * diameter)) * 10;
+                heightSlider.value = newHeight.toFixed(1);
+            } else if (this === volumeInput) {
+                // update both other variables and keep ratio of height and diameter the same
+                const oldHeight = parseFloat(heightSlider.value);
+                const oldDiameter = parseFloat(diameterSlider.value);
+                const oldVolume = (Math.PI * Math.pow(oldDiameter / 20, 2) * oldHeight / 10);
+            
+                const newVolume = parseFloat(volumeInput.value);
+                const volumeScaleRatio = newVolume / oldVolume;
+                const dimensionScaleRatio = Math.pow(volumeScaleRatio, 1/3);
+                heightSlider.value = (oldHeight * dimensionScaleRatio).toFixed(1);
+                diameterSlider.value = (oldDiameter * dimensionScaleRatio).toFixed(1);
+            }
+
+            heightValue.textContent = heightSlider.value;
+            diameterValue.textContent = diameterSlider.value;
+            strokeWidthValue.textContent = strokeWidthSlider.value;
+
+            drawContainer();
+        }
+
+        function drawContainer() {
+            const heightMm = parseFloat(heightSlider.value);
+            const diameterMm = parseFloat(diameterSlider.value);
+            const strokeWidthMm = parseFloat(strokeWidthSlider.value);
+            const maxDimension = Math.max(heightMm, diameterMm);
+            const scale = 250 / maxDimension;
+
+            svg.innerHTML = '';
+            
+            // Create a path for the cylinder with closed bottom and open top
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const x = (300 - diameterMm * scale) / 2;
+            const bottomY = 280; // Fixed bottom position
+            const topY = bottomY - heightMm * scale;
+            const width = diameterMm * scale;
+            
+            const d = `M ${x},${topY} ` +        // Start at top-left
+                      `V ${bottomY} ` +          // Draw left side down
+                      `H ${x + width} ` +        // Draw bottom
+                      `V ${topY}`;               // Draw right side up
+            
+            path.setAttribute('d', d);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', 'black');
+            path.setAttribute('stroke-width', strokeWidthMm * scale);
+            svg.appendChild(path);
+        }
+
+        volumeInput.addEventListener('input', updateContainer);
+        heightSlider.addEventListener('input', updateContainer);
+        diameterSlider.addEventListener('input', updateContainer);
+        strokeWidthSlider.addEventListener('input', updateContainer);
+
+        updateContainer();
+    </script>
+</body>
+</html>
