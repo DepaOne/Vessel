@@ -4,7 +4,6 @@ import SliderWithInput from './components/SliderWithInput';
 import ContainerSVG from './components/ContainerSVG';
 import Cylinder from './components/Cylinder'; // Import the new Cylinder component
 
-
 function App() {
   const [volume, setVolume] = useState(1000);
   const [height, setHeight] = useState(100);
@@ -62,6 +61,7 @@ function App() {
           )}
         </div>
         <div className="controls">
+          <h1 className="app-header">VESSEL</h1>
           <SliderWithInput
             id="volume"
             label="Volume (mL)"
