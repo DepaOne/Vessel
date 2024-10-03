@@ -18,7 +18,7 @@ function ContainerSVG({ height, diameter, strokeWidth }) {
       <path
         d={d}
         fill="none"
-        stroke="black"
+        stroke="#363636"
         strokeWidth={strokeWidth * scale}
       />
     </svg>

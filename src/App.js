@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import SliderWithInput from './components/SliderWithInput';
 import ContainerSVG from './components/ContainerSVG';
@@ -10,6 +10,8 @@ function App() {
   const [diameter, setDiameter] = useState(112.8);
   const [thickness, setThickness] = useState(1); // Combined thickness state
   const [activeView, setActiveView] = useState('3D'); // '3D' or '2D'
+  const [strokeColor, setStrokeColor] = useState('#363636');
+  const [pathStrokeColor, setPathStrokeColor] = useState('#363636');
 
   const updateFromVolume = (newVolume) => {
     const oldVolume = (Math.PI * Math.pow(diameter / 20, 2) * height / 10);
@@ -40,11 +42,28 @@ function App() {
     setActiveView(prevView => prevView === '3D' ? '2D' : '3D');
   };
 
+  const handleColorChange = (e) => {
+    setPathStrokeColor(e.target.value);
+  };
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--svg-stroke-color', strokeColor);
+  }, [strokeColor]);
+
   return (
     <div className="App">
       <div className="container">
         <div className="visualization-container">
-          {activeView === '3D' ? (
+          {activeView === '2D' ? (
+            <div className="svg-container">
+              <ContainerSVG 
+                height={height} 
+                diameter={diameter} 
+                strokeWidth={thickness}
+                strokeColor={strokeColor}
+              />
+            </div>
+          ) : (
             <div className="three-d-container">
               {console.log('Rendering 3D view', { diameter, height, thickness })}
               <Cylinder 
@@ -52,11 +71,6 @@ function App() {
                 height={height} 
                 thickness={thickness}
               />
-            </div>
-          ) : (
-            <div className="svg-container">
-              {console.log('Rendering 2D view')}
-              <ContainerSVG height={height} diameter={diameter} strokeWidth={thickness} />
             </div>
           )}
         </div>
@@ -95,8 +109,19 @@ function App() {
             value={thickness}
             onChange={setThickness}
           />
-          <div className="switch-container">
-            <span className={`switch-label ${activeView === '2D' ? 'active' : ''}`}>2D</span>
+          <div className="control-group">
+            <label htmlFor="pathStrokeColor">Path Stroke Color</label>
+            <div className="color-picker-wrapper">
+              <input
+                type="color"
+                id="pathStrokeColor"
+                value={pathStrokeColor}
+                onChange={handleColorChange}
+              />
+              <span className="color-value">{pathStrokeColor}</span>
+            </div>
+          </div>
+          <div className="switch-wrapper">
             <label className="switch">
               <input
                 type="checkbox"
@@ -105,7 +130,7 @@ function App() {
               />
               <span className="slider round"></span>
             </label>
-            <span className={`switch-label ${activeView === '3D' ? 'active' : ''}`}>3D</span>
+            <span className="switch-label">{activeView === '3D' ? '3D' : '2D'}</span>
           </div>
         </div>
       </div>
