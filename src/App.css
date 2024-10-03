@@ -1,0 +1,123 @@
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center; /* Center the content horizontally */
+  align-items: center;
+}
+
+.visualization-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px; /* This adds space between the 2D and 3D renders */
+}
+
+.svg-container, .three-d-container {
+  width: 300px; /* Set a fixed width */
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.controls {
+  width: 300px;
+  padding: 20px;
+  overflow-y: auto;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  position: absolute; /* Position the controls absolutely */
+  right: 0; /* Align to the right side of the viewport */
+  top: 0; /* Align to the top of the viewport */
+  height: 100%; /* Make it full height */
+  box-sizing: border-box; /* Include padding in the height calculation */
+}
+
+.slider-with-input {
+  margin-bottom: 20px;
+}
+
+.slider-with-input label {
+  display: block;
+  margin-bottom: 5px;
+  color: #333; /* Label text color */
+  font-size: 12px; /* Label font size */
+  font-weight: bold; /* Label font weight */
+}
+
+.slider-with-input .input-group {
+  display: flex;
+  align-items: center;
+}
+
+/* Styling for the range input (slider) */
+.slider-with-input input[type="range"] {
+  flex: 1;
+  margin-right: 10px;
+  -webkit-appearance: none; /* Remove default appearance */
+  width: 100%;
+  height: 5px; /* Slider track height */
+  background: #ddd; /* Slider track color */
+  outline: none;
+  border-radius: 5px; /* Rounded corners for the track */
+}
+
+/* Styling for the slider thumb */
+.slider-with-input input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px; /* Thumb width */
+  height: 12px; /* Thumb height */
+  background: #1b1b1b; /* Thumb color */
+  cursor: pointer;
+  border-radius: 50%; /* Circular thumb */
+}
+
+.slider-with-input input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #4CAF50;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+/* Styling for the number input */
+.slider-with-input input[type="number"] {
+  width: 60px;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: right;
+}
+
+/* Hover effects */
+.slider-with-input input[type="range"]:hover {
+  background: #ccc;
+}
+
+.slider-with-input input[type="number"]:hover {
+  border-color: #999;
+}
+
+/* Focus effects */
+.slider-with-input input[type="range"]:focus {
+  background: #bbb;
+}
+
+.slider-with-input input[type="number"]:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
+body, input, button {
+  font-family: 'HKGrotesk', sans-serif;
+}
