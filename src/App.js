@@ -60,7 +60,7 @@ function App() {
                 height={height} 
                 diameter={diameter} 
                 strokeWidth={thickness}
-                strokeColor={strokeColor}
+                strokeColor={strokeColor}  // Add this line
               />
             </div>
           ) : (
@@ -109,19 +109,21 @@ function App() {
             value={thickness}
             onChange={setThickness}
           />
+      
+        
+         
           <div className="control-group">
-            <label htmlFor="pathStrokeColor">Path Stroke Color</label>
+            <label htmlFor="strokeColor">Stroke Color</label>
             <div className="color-picker-wrapper">
               <input
                 type="color"
-                id="pathStrokeColor"
-                value={pathStrokeColor}
-                onChange={handleColorChange}
+                id="strokeColor"
+                value={strokeColor}
+                onChange={(e) => setStrokeColor(e.target.value)}
               />
-              <span className="color-value">{pathStrokeColor}</span>
+              <span className="color-value">{strokeColor}</span>
             </div>
-          </div>
-          <div className="switch-wrapper">
+            <div className="switch-wrapper">
             <label className="switch">
               <input
                 type="checkbox"
@@ -131,6 +133,7 @@ function App() {
               <span className="slider round"></span>
             </label>
             <span className="switch-label">{activeView === '3D' ? '3D' : '2D'}</span>
+          </div>
           </div>
         </div>
       </div>

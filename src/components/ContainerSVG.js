@@ -1,6 +1,6 @@
 import React from 'react';
 
-function ContainerSVG({ height, diameter, strokeWidth }) {
+function ContainerSVG({ height, diameter, strokeWidth, strokeColor }) {
   const maxDimension = Math.max(height, diameter);
   const scale = 250 / maxDimension;
   const x = (300 - diameter * scale) / 2;
@@ -18,7 +18,7 @@ function ContainerSVG({ height, diameter, strokeWidth }) {
       <path
         d={d}
         fill="none"
-        stroke="#363636"
+        stroke={strokeColor}  // This is the only change
         strokeWidth={strokeWidth * scale}
       />
     </svg>
