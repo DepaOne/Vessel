@@ -9,9 +9,9 @@ function ContainerSVG({ height, diameter, strokeWidth, strokeColor }) {
   const width = diameter * scale;
 
   const d = `M ${x},${topY} ` +
-            `V ${bottomY} ` +
-            `H ${x + width} ` +
-            `V ${topY}`;
+    `V ${bottomY} ` +
+    `H ${x + width} ` +
+    `V ${topY}`;
 
   return (
     <svg id="container" width="300" height="300">

@@ -13,15 +13,16 @@ function App() {
   const [strokeColor, setStrokeColor] = useState('#363636');
   const [pathStrokeColor, setPathStrokeColor] = useState('#363636');
   const [zoom, setZoom] = useState(1);
+  const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
 
   const updateFromVolume = (newVolume) => {
     const oldVolume = (Math.PI * Math.pow(diameter / 20, 2) * height / 10);
     const volumeScaleRatio = newVolume / oldVolume;
-    const dimensionScaleRatio = Math.pow(volumeScaleRatio, 1/3);
-    
+    const dimensionScaleRatio = Math.pow(volumeScaleRatio, 1 / 3);
+
     const newHeight = parseFloat((height * dimensionScaleRatio).toFixed(1));
     const newDiameter = parseFloat((diameter * dimensionScaleRatio).toFixed(1));
-    
+
     setHeight(newHeight);
     setDiameter(newDiameter);
     setVolume(newVolume);
@@ -55,26 +56,49 @@ function App() {
     document.documentElement.style.setProperty('--svg-stroke-color', strokeColor);
   }, [strokeColor]);
 
+  // Zoom controls: + to zoom in, - to zoom out
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === '+' || e.key === '=') setZoom(z => Math.min(z + 0.1, 5));
+      if (e.key === '-') setZoom(z => Math.max(z - 0.1, 0.1));
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setViewport({ width: window.innerWidth, height: window.innerHeight });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <div className="App">
       <div className="container">
         <div className="visualization-container" style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}>
           {activeView === '2D' ? (
             <div className="svg-container">
-              <ContainerSVG 
-                height={height} 
-                diameter={diameter} 
+              <ContainerSVG
+                height={height}
+                diameter={diameter}
                 strokeWidth={thickness}
-                strokeColor={strokeColor}  // Add this line
+                strokeColor={strokeColor}
+                zoom={zoom}
+                viewportWidth={viewport.width}
+                viewportHeight={viewport.height}
               />
             </div>
           ) : (
             <div className="three-d-container">
               {console.log('Rendering 3D view', { diameter, height, thickness })}
-              <Cylinder 
-                diameter={diameter} 
-                height={height} 
+              <Cylinder
+                diameter={diameter}
+                height={height}
                 thickness={thickness}
+                strokeColor={strokeColor} // <-- Add this line
+                zoom={zoom}
               />
             </div>
           )}
@@ -135,16 +159,16 @@ function App() {
               <span className="color-value">{strokeColor}</span>
             </div>
             <div className="switch-wrapper">
-            <label className="switch">
-              <input
-                type="checkbox"
-                checked={activeView === '3D'}
-                onChange={toggleView}
-              />
-              <span className="slider round"></span>
-            </label>
-            <span className="switch-label">{activeView === '3D' ? '3D' : '2D'}</span>
-          </div>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={activeView === '3D'}
+                  onChange={toggleView}
+                />
+                <span className="slider round"></span>
+              </label>
+              <span className="switch-label">{activeView === '3D' ? '3D' : '2D'}</span>
+            </div>
           </div>
         </div>
       </div>

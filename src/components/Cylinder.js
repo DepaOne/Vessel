@@ -121,7 +121,11 @@ const Cylinder = ({ diameter, height, strokeColor }) => {
     const wireframe = new LineSegments(edges, lineMaterial);
     scene.add(wireframe);
 
-    camera.position.z = Math.max(diameter, height) * 1.5;
+
+
+    // Move camera further back
+    camera.position.z = Math.max(diameter, height) * 2.5; // was 1.5
+
     camera.position.y = height / 4;
     camera.lookAt(scene.position);
 
@@ -129,6 +133,8 @@ const Cylinder = ({ diameter, height, strokeColor }) => {
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.enableZoom = true;
+    controls.minDistance = Math.max(diameter, height) * 1.2;
+    controls.maxDistance = Math.max(diameter, height) * 10;
 
     let animationId;
     const animate = () => {
