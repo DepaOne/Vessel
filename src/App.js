@@ -12,6 +12,7 @@ function App() {
   const [activeView, setActiveView] = useState('3D'); // '3D' or '2D'
   const [strokeColor, setStrokeColor] = useState('#363636');
   const [pathStrokeColor, setPathStrokeColor] = useState('#363636');
+  const [zoom, setZoom] = useState(1);
 
   const updateFromVolume = (newVolume) => {
     const oldVolume = (Math.PI * Math.pow(diameter / 20, 2) * height / 10);
@@ -46,6 +47,10 @@ function App() {
     setPathStrokeColor(e.target.value);
   };
 
+  const handleZoomChange = (e) => {
+    setZoom(parseFloat(e.target.value));
+  };
+
   useEffect(() => {
     document.documentElement.style.setProperty('--svg-stroke-color', strokeColor);
   }, [strokeColor]);
@@ -53,7 +58,7 @@ function App() {
   return (
     <div className="App">
       <div className="container">
-        <div className="visualization-container">
+        <div className="visualization-container" style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}>
           {activeView === '2D' ? (
             <div className="svg-container">
               <ContainerSVG 
@@ -109,9 +114,15 @@ function App() {
             value={thickness}
             onChange={setThickness}
           />
-      
-        
-         
+          <SliderWithInput
+            id="zoom"
+            label="Zoom"
+            min={0.5}
+            max={2}
+            step={0.1}
+            value={Number(zoom.toFixed(2))}
+            onChange={(newZoom) => setZoom(Number(newZoom.toFixed(2)))}
+          />
           <div className="control-group">
             <label htmlFor="strokeColor">Stroke Color</label>
             <div className="color-picker-wrapper">

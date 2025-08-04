@@ -1,31 +1,43 @@
 import React from 'react';
 
-function SliderWithInput({ id, label, min, max, step = 1, value, onChange }) {
+const SliderWithInput = ({ id, label, min, max, step = 1, value, onChange }) => {
+  const handleSliderChange = (e) => {
+    const newValue = parseFloat(e.target.value);
+    onChange(Number(newValue.toFixed(2)));
+  };
+
+  const handleInputChange = (e) => {
+    let newValue = parseFloat(e.target.value);
+    if (!isNaN(newValue)) {
+      newValue = Math.min(Math.max(newValue, min), max);
+      onChange(Number(newValue.toFixed(2)));
+    }
+  };
+
   return (
     <div className="slider-with-input">
       <label htmlFor={id}>{label}</label>
-      <div className="input-group">
+      <div className="slider-input-wrapper">
         <input
           type="range"
-          id={`${id}-slider`}
+          id={id}
           min={min}
           max={max}
           step={step}
           value={value}
-          onChange={(e) => onChange(parseFloat(e.target.value))}
+          onChange={handleSliderChange}
         />
         <input
           type="number"
-          id={`${id}-input`}
+          value={value}
+          onChange={handleInputChange}
+          step={step}
           min={min}
           max={max}
-          step={step}
-          value={value}
-          onChange={(e) => onChange(parseFloat(e.target.value))}
         />
       </div>
     </div>
   );
-}
+};
 
 export default SliderWithInput;
