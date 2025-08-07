@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import SliderWithInput from './components/SliderWithInput';
 import ContainerSVG from './components/ContainerSVG';
 import Cylinder from './components/Cylinder'; // Import the new Cylinder component
+import SVGImporter from './components/SVGImporter';
 
 function App() {
   const [volume, setVolume] = useState(1000);
@@ -14,6 +15,9 @@ function App() {
   const [pathStrokeColor, setPathStrokeColor] = useState('#363636');
   const [zoom, setZoom] = useState(1);
   const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
+  const [showMesh, setShowMesh] = useState(false);
+  const [roughness, setRoughness] = useState(0.02); // Add this line
+  const [customProfile, setCustomProfile] = useState(null);
 
   const updateFromVolume = (newVolume) => {
     const oldVolume = (Math.PI * Math.pow(diameter / 20, 2) * height / 10);
@@ -74,10 +78,25 @@ function App() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Add this useEffect to debug state changes:
+  useEffect(() => {
+    console.log('🔄 customProfile state changed:', customProfile);
+  }, [customProfile]);
+
+  // Also, let's make sure the handleProfileImported doesn't get recreated on every render:
+  const handleProfileImported = useCallback((points) => {
+    console.log('App.js - Profile imported:', points);
+    setCustomProfile(points);
+    console.log('App.js - customProfile state set to:', points);
+  }, []);
+
   return (
     <div className="App">
       <div className="container">
-        <div className="visualization-container" style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}>
+        <div className="visualization-container" style={{
+          transform: activeView === '2D' ? `scale(${zoom})` : 'none',
+          transformOrigin: 'center center'
+        }}>
           {activeView === '2D' ? (
             <div className="svg-container">
               <ContainerSVG
@@ -92,19 +111,33 @@ function App() {
             </div>
           ) : (
             <div className="three-d-container">
-              {console.log('Rendering 3D view', { diameter, height, thickness })}
+              {console.log('App.js - Rendering Cylinder with customProfile:', customProfile)}
               <Cylinder
-                diameter={diameter}
-                height={height}
+                diameter={customProfile ? 100 : diameter}
+                height={customProfile ? 100 : height}
                 thickness={thickness}
-                strokeColor={strokeColor} // <-- Add this line
-                zoom={zoom}
+                strokeColor={strokeColor}
+                zoom={zoom}  // Pass zoom for 3D camera control
+                showMesh={showMesh}
+                roughness={roughness}
+                customProfile={customProfile}
               />
             </div>
           )}
         </div>
         <div className="controls">
           <h1 className="app-header">VESSEL</h1>
+          <SVGImporter onProfileImported={handleProfileImported} />
+          {customProfile && (
+            <div>
+              <button onClick={() => setCustomProfile(null)}>
+                Reset to Default Shape
+              </button>
+              <div style={{ fontSize: '12px', color: '#666' }}>
+                Custom profile active: {customProfile.length} points
+              </div>
+            </div>
+          )}
           <SliderWithInput
             id="volume"
             label="Volume (mL)"
@@ -120,6 +153,11 @@ function App() {
             max={1000}
             value={height}
             onChange={updateDiameterFromHeight}
+            disabled={customProfile !== null} // Disable when custom profile is active
+            style={{
+              opacity: customProfile !== null ? 0.5 : 1,
+              cursor: customProfile !== null ? 'not-allowed' : 'pointer'
+            }}
           />
           <SliderWithInput
             id="diameter"
@@ -128,6 +166,11 @@ function App() {
             max={1000}
             value={diameter}
             onChange={updateHeightFromDiameter}
+            disabled={customProfile !== null} // Disable when custom profile is active
+            style={{
+              opacity: customProfile !== null ? 0.5 : 1,
+              cursor: customProfile !== null ? 'not-allowed' : 'pointer'
+            }}
           />
           <SliderWithInput
             id="thickness"
@@ -137,6 +180,15 @@ function App() {
             step={0.1}
             value={thickness}
             onChange={setThickness}
+          />
+          <SliderWithInput
+            id="roughness"
+            label="Surface Roughness"
+            min={0}
+            max={0.1}
+            step={0.005}
+            value={roughness}
+            onChange={setRoughness}
           />
           <SliderWithInput
             id="zoom"
@@ -169,6 +221,16 @@ function App() {
               </label>
               <span className="switch-label">{activeView === '3D' ? '3D' : '2D'}</span>
             </div>
+          </div>
+          <div className="control-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={showMesh}
+                onChange={e => setShowMesh(e.target.checked)}
+              />
+              Show Mesh
+            </label>
           </div>
         </div>
       </div>

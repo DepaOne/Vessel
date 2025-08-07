@@ -8,21 +8,24 @@
 
 .container {
   display: flex;
-  width: 100%;
-  height: 100%;
-  justify-content: center; /* Center the content horizontally */
-  align-items: flex-start; /* Change from center to flex-start */
-
-  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  /* For positioning floating controls */
 }
 
 .visualization-container {
-  width: 400px;
-  height: 400px;
+  width: 100vw;
+  /* Full viewport width */
+  height: 100vh;
+  /* Full viewport height */
   transition: transform 0.3s ease;
 }
 
-.svg-container, .three-d-container {
+.svg-container,
+.three-d-container {
   width: 100%;
   height: 100%;
 }
@@ -31,15 +34,17 @@
   width: 300px;
   padding: 20px;
   overflow-y: auto;
-  box-shadow: 0px 0 0px rgba(0, 0, 0, 0.1);
-  border-left: 0px solid #b9b9b9; /* This adds a border all around */
-  border-radius: 0px; /* This rounds the corners */
-  position: absolute; /* Position the controls absolutely */
-  right: 0; /* Align to the right side of the viewport */
-  top: 0; /* Align to the top of the viewport */
-  height: 100%; /* Make it full height */
-  box-sizing: border-box; /* Include padding in the height calculation */
-
+  background: #f0e9e7;
+  /* Same as app background */
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  bottom: 20px;
+  box-sizing: border-box;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .slider-with-input {
@@ -49,9 +54,12 @@
 .slider-with-input label {
   display: block;
   margin-bottom: 5px;
-  color: #333; /* Label text color */
-  font-size: 12px; /* Label font size */
-  font-weight: 400; /* Label font weight */
+  color: #333;
+  /* Label text color */
+  font-size: 12px;
+  /* Label font size */
+  font-weight: 400;
+  /* Label font weight */
 }
 
 .slider-with-input .input-group {
@@ -63,23 +71,31 @@
 .slider-with-input input[type="range"] {
   flex: 1;
   margin-right: 10px;
-  -webkit-appearance: none; /* Remove default appearance */
+  -webkit-appearance: none;
+  /* Remove default appearance */
   width: 50%;
-  height: 0.5px; /* Slider track height */
-  background: #363636; /* Slider track color */
+  height: 0.5px;
+  /* Slider track height */
+  background: #363636;
+  /* Slider track color */
   outline: none;
-  border-radius: 5px; /* Rounded corners for the track */
+  border-radius: 5px;
+  /* Rounded corners for the track */
 }
 
 /* Styling for the slider thumb */
 .slider-with-input input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 4px; /* Thumb width */
-  height: 12px; /* Thumb height */
-  background: #1b1b1b; /* Thumb color */
+  width: 4px;
+  /* Thumb width */
+  height: 12px;
+  /* Thumb height */
+  background: #1b1b1b;
+  /* Thumb color */
   cursor: pointer;
-  border-radius: 0%; /* Circular thumb */
+  border-radius: 0%;
+  /* Circular thumb */
 }
 
 .slider-with-input input[type="range"]::-moz-range-thumb {
@@ -95,8 +111,10 @@
   width: 48px;
   padding: 5px;
   border: 0px solid #ddd;
-  background-color: #e8e8e8; /* Light gray background */
-  color: #363636; /* Dark text color for contrast */
+  background-color: #e8e8e8;
+  /* Light gray background */
+  color: #363636;
+  /* Dark text color for contrast */
   border-radius: 0px;
   font-size: 12px;
   text-align: left;
@@ -121,7 +139,9 @@
   outline: none;
 }
 
-body, input, button {
+body,
+input,
+button {
   font-family: 'HKGrotesk', sans-serif;
 }
 
@@ -148,24 +168,25 @@ body, input, button {
   margin-top: 20px;
   font-size: 12px;
   font-weight: bold;
-  
+
 
   text-transform: uppercase;
-  
+
   /* Colors */
   background-color: rgb(65, 65, 65);
-  color: #363636 !important; /* Dark gray color */
-  
+  color: #363636 !important;
+  /* Dark gray color */
+
   /* Border and shape */
   border: none;
   border-radius: 0%;
-  
+
   /* Cursor */
   cursor: pointer;
-  
+
   /* Transition for smooth hover effect */
   transition: all 0.3s ease;
-  
+
   /* Box shadow for depth */
   box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.2);
 }
@@ -203,15 +224,18 @@ body, input, button {
 .switch-wrapper {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Aligns content to the left */
+  justify-content: flex-start;
+  /* Aligns content to the left */
   margin-top: 20px;
 }
 
 .switch {
   position: relative;
   display: inline-block;
-  width: 40px; /* Reduced from typical 60px */
-  height: 22px; /* Reduced from typical 34px */
+  width: 40px;
+  /* Reduced from typical 60px */
+  height: 22px;
+  /* Reduced from typical 34px */
   border: none !important;
   outline: none !important;
 }
@@ -240,20 +264,25 @@ body, input, button {
 .slider:before {
   position: absolute;
   content: "";
-  height: 18px; /* Reduced from typical 26px */
-  width: 18px; /* Reduced from typical 26px */
-  left: 2px; /* Adjusted for smaller switch */
-  bottom: 2px; /* Adjusted for smaller switch */
+  height: 18px;
+  /* Reduced from typical 26px */
+  width: 18px;
+  /* Reduced from typical 26px */
+  left: 2px;
+  /* Adjusted for smaller switch */
+  bottom: 2px;
+  /* Adjusted for smaller switch */
   background-color: white;
   transition: .4s;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: #c6c6c6;
 }
 
-input:checked + .slider:before {
-  transform: translateX(18px); /* Adjusted for smaller switch */
+input:checked+.slider:before {
+  transform: translateX(18px);
+  /* Adjusted for smaller switch */
 }
 
 .slider.round {
@@ -266,7 +295,8 @@ input:checked + .slider:before {
 
 .switch-label {
   margin-left: 12px;
-  font-size: 12px; /* Adjust as needed */
+  font-size: 12px;
+  /* Adjust as needed */
   color: #363636;
   font-weight: 400;
   vertical-align: middle;
