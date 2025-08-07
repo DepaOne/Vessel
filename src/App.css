@@ -1,9 +1,19 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f0e9e7;
+  /* Main app background */
+  font-family: 'HKGrotesk', sans-serif;
+}
+
 .App {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
   width: 100vw;
+  background-color: #f0e9e7;
+  /* Ensure App also has the background */
 }
 
 .container {
@@ -36,15 +46,15 @@
   overflow-y: auto;
   background: #f0e9e7;
   /* Same as app background */
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 0.75px solid #acacac;
+  border-radius: 0px;
   position: fixed;
   right: 20px;
   top: 20px;
   bottom: 20px;
   box-sizing: border-box;
   z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
 }
 
 .slider-with-input {
