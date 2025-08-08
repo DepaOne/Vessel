@@ -3,11 +3,19 @@ import React, { useState, useRef } from 'react';
 // Safe-mode flag (toggle in DevTools or before load): localStorage.setItem('VESSEL_SAFE','1')
 const SAFE_MODE = typeof window !== 'undefined' && localStorage.getItem('VESSEL_SAFE') === '1';
 
-// Tune caps here (lower in safe mode to prevent freezes)
-const MAX_PROFILE_POINTS = SAFE_MODE ? 300 : 400;
-const TARGET_PROFILE_POINTS = SAFE_MODE ? 180 : 220;
-const MIN_CURVE_SAMPLES = 4;
-const MAX_CURVE_SAMPLES = SAFE_MODE ? 16 : 40;
+// Safeguard switches (toggle without deleting code)
+const ENFORCE_TIME_BUDGET = false;     // was true via default param
+const ENABLE_DEDUPE = true;
+const ENABLE_SIMPLIFY = true;
+const ENABLE_UNIFORM_RESAMPLE = true;
+
+// Bezier/arc sampling caps (relaxed)
+const MIN_CURVE_SAMPLES = SAFE_MODE ? 6 : 10;
+const MAX_CURVE_SAMPLES = SAFE_MODE ? 24 : 120;
+
+// Vertical resample caps (relaxed)
+const MAX_PROFILE_POINTS = SAFE_MODE ? 350 : 1200;
+const TARGET_PROFILE_POINTS = SAFE_MODE ? 240 : 720;
 
 function sampleQuadratic(x0, y0, x1, y1, x2, y2, samples) {
     const out = [];
@@ -95,7 +103,8 @@ function arcToCenterParam(x1, y1, x2, y2, fa, fs, rx, ry, phiRad) {
 function adaptiveArcSamples(rx, ry, absDelta) {
     const avgR = (Math.abs(rx) + Math.abs(ry)) / 2;
     const estLen = avgR * absDelta;
-    const n = Math.round(estLen / 10);
+    // More points per unit length: decrease divisor (10 -> 6 or 5)
+    const n = Math.round(estLen / (SAFE_MODE ? 8 : 6)); // denser arcs
     return Math.min(MAX_CURVE_SAMPLES, Math.max(MIN_CURVE_SAMPLES, n));
 }
 
@@ -277,20 +286,16 @@ const SVGImporter = ({ onProfileImported }) => {
             }
 
             if (points && points.length > 0) {
-                const raw = points.slice(); // keep copy before simplify
+                const raw = points.slice();
 
                 dlog(`[SVG] Pre-simplify: ${points.length}`);
-                points = dedupeByDistance(points, 0.01);
-                points = collinearSimplify(points, 0.05);
+                if (ENABLE_DEDUPE) points = dedupeByDistance(points, 0.001); // was 0.01
+                if (ENABLE_SIMPLIFY) points = collinearSimplify(points, 0.005); // was 0.05
 
-                // If simplify is too aggressive, restore and relax
                 if (points.length < 3) {
-                    dlog('[SVG] Simplify reduced to <3. Restoring raw and relaxing tolerances.');
-                    points = dedupeByDistance(raw, 0.0001); // much smaller epsilon
-                    // skip collinearSimplify here, or use a tiny tolerance
+                    points = dedupeByDistance(raw, 0.0001);
                 }
 
-                // Cap but never under 3
                 if (points.length > MAX_PROFILE_POINTS) {
                     dlog(`[SVG] Decimating ${points.length} -> ~${TARGET_PROFILE_POINTS}`);
                     points = decimateEven(points, TARGET_PROFILE_POINTS);
@@ -336,11 +341,13 @@ const SVGImporter = ({ onProfileImported }) => {
                 }));
                 console.log('Final points (ready for vessel):', points);
 
-                // Optional: even-out vertical segment density
-                const desired = Math.min(TARGET_PROFILE_POINTS, MAX_PROFILE_POINTS); // allow upsampling
-                const uniform = resampleUniformByY(points, desired);
-                dlog(`[SVG] Uniform Y resample: ${points.length} -> ${uniform.length}`);
-                points = uniform;
+                // Optional uniform resample (switchable)
+                if (ENABLE_UNIFORM_RESAMPLE) {
+                    const desired = Math.min(TARGET_PROFILE_POINTS, MAX_PROFILE_POINTS);
+                    const uniform = resampleUniformByY(points, desired);
+                    dlog(`[SVG] Uniform Y resample: ${points.length} -> ${uniform.length}`);
+                    points = uniform;
+                }
 
                 // Update outputs
                 setRawPoints(points);
@@ -411,7 +418,7 @@ const SVGImporter = ({ onProfileImported }) => {
     }
 
     // Replace your tokens building line inside svgPathToPoints:
-    function svgPathToPoints(pathData, timeBudgetMs = SAFE_MODE ? 16 : 50) {
+    function svgPathToPoints(pathData, timeBudgetMs = ENFORCE_TIME_BUDGET ? (SAFE_MODE ? 16 : 50) : Infinity) {
         if (!pathData) return { points: [], aborted: false };
         // OLD:
         // const tokens = pathData.replace(/([a-zA-Z])/g, ' $1 ').replace(/,/g, ' ').trim().split(/\s+/);

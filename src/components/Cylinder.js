@@ -161,13 +161,11 @@ const Cylinder = ({
     }
 
     // Before creating LatheGeometry (right above new THREE.LatheGeometry)
-    const MAX_VERTS = 80000; // tighter safety cap
-    let radialSegments = 128;  // lower default => fewer radial faces
+    const MAX_VERTS = 160000;       // was 80000
+    let radialSegments = 64;        // was 32/48/128 depending on your last edit
     let estVerts = (points?.length || 0) * radialSegments;
     if (estVerts > MAX_VERTS && points?.length) {
       radialSegments = Math.max(12, Math.floor(MAX_VERTS / points.length));
-      estVerts = points.length * radialSegments;
-      console.warn(`[Lathe] radialSegments -> ${radialSegments} to keep verts under ${MAX_VERTS}`);
     }
 
     // Create geometry using LatheGeometry
