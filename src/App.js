@@ -16,8 +16,12 @@ function App() {
   const [zoom, setZoom] = useState(1);
   const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [showMesh, setShowMesh] = useState(false);
-  const [roughness, setRoughness] = useState(0.02); // Add this line
+  const [roughness, setRoughness] = useState(0.00); // Add this line
   const [customProfile, setCustomProfile] = useState(null);
+  const [opacity, setOpacity] = useState(0.8);
+  const [metalness, setMetalness] = useState(0.1);
+  const [materialRoughness, setMaterialRoughness] = useState(0.8);
+  const [flatShading, setFlatShading] = useState(false);
 
   const updateFromVolume = (newVolume) => {
     const oldVolume = (Math.PI * Math.pow(diameter / 20, 2) * height / 10);
@@ -121,6 +125,10 @@ function App() {
                 showMesh={showMesh}
                 roughness={roughness}
                 customProfile={customProfile}
+                opacity={opacity}
+                metalness={metalness}
+                materialRoughness={materialRoughness}
+                flatShading={flatShading}
               />
             </div>
           )}
@@ -199,6 +207,33 @@ function App() {
             value={Number(zoom.toFixed(2))}
             onChange={(newZoom) => setZoom(Number(newZoom.toFixed(2)))}
           />
+          <SliderWithInput
+            id="opacity"
+            label="Opacity"
+            min={0.1}
+            max={1}
+            step={0.05}
+            value={opacity}
+            onChange={setOpacity}
+          />
+          <SliderWithInput
+            id="metalness"
+            label="Metalness"
+            min={0}
+            max={1}
+            step={0.05}
+            value={metalness}
+            onChange={setMetalness}
+          />
+          <SliderWithInput
+            id="materialRoughness"
+            label="Material Roughness"
+            min={0}
+            max={1}
+            step={0.05}
+            value={materialRoughness}
+            onChange={setMaterialRoughness}
+          />
           <div className="control-group">
             <label htmlFor="strokeColor">Stroke Color</label>
             <div className="color-picker-wrapper">
@@ -230,6 +265,16 @@ function App() {
                 onChange={e => setShowMesh(e.target.checked)}
               />
               Show Mesh
+            </label>
+          </div>
+          <div className="control-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={flatShading}
+                onChange={e => setFlatShading(e.target.checked)}
+              />
+              Flat Shading
             </label>
           </div>
         </div>

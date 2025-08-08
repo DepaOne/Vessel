@@ -9,10 +9,16 @@ const Cylinder = ({
   strokeColor,
   showMesh,
   roughness,
-  zoom,           // Add zoom prop here
-  customProfile = null
+  zoom,
+  customProfile = null,
+  opacity = 0.8,
+  metalness = 0.1,
+  materialRoughness = 0.8,
+  wireframeMode = false,
+  flatShading = false
 }) => {
   const mountRef = useRef(null);
+  const rafRef = useRef(0); // track animation frame
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -52,7 +58,7 @@ const Cylinder = ({
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
     directionalLight.position.set(0, height, Math.max(diameter, height));
     scene.add(directionalLight);
 
@@ -69,6 +75,46 @@ const Cylinder = ({
         console.log('Converted to Vector2:', points);
 
         if (points.length > 0) {
+          // points = validateAndFixProfile(points);
+          function analyzeAndScaleProfile(rawPoints, targetHeight, preserveAspect = true) {
+            if (!rawPoints.length) return rawPoints;
+
+            // Original bounds
+            const minY = Math.min(...rawPoints.map(p => p.y));
+            const maxY = Math.max(...rawPoints.map(p => p.y));
+            const originalHeight = maxY - minY || 1;
+
+            // For a lathe profile x is radius (>=0). Width = maxX (since minX is typically 0)
+            const maxX = Math.max(...rawPoints.map(p => p.x));
+            const originalWidth = maxX || 1;
+
+            const originalAspect = originalHeight / originalWidth; // H:W
+
+            // Desired scaling (we map height to targetHeight; apply same factor to X if preserving aspect)
+            const heightScale = targetHeight / originalHeight;
+            const widthScale = preserveAspect ? heightScale : 1; // If not preserving, you could compute separately
+
+            const scaled = rawPoints.map(p => new THREE.Vector2(p.x * widthScale, (p.y - minY) * heightScale));
+
+            // New bounds
+            const newHeight = Math.max(...scaled.map(p => p.y)) - Math.min(...scaled.map(p => p.y));
+            const newWidth = Math.max(...scaled.map(p => p.x));
+            const newAspect = newHeight / (newWidth || 1);
+
+            console.group('SVG Aspect Debug');
+            console.log('Original width (radius extent):', originalWidth);
+            console.log('Original height:', originalHeight);
+            console.log('Original aspect (H/W):', originalAspect.toFixed(4));
+            console.log('Scaled width:', newWidth);
+            console.log('Scaled height:', newHeight);
+            console.log('Scaled aspect (H/W):', newAspect.toFixed(4));
+            console.log('Aspect drift (%):', (((newAspect - originalAspect) / originalAspect) * 100).toFixed(3), '%');
+            console.groupEnd();
+
+            return scaled;
+          }
+
+          points = analyzeAndScaleProfile(points, height, true); // true => preserve aspect
           points = validateAndFixProfile(points);
           console.log('After validation:', points);
         } else {
@@ -102,8 +148,30 @@ const Cylinder = ({
 
     console.log('Final points passed to LatheGeometry:', points.map(p => `(${p.x}, ${p.y})`));
 
+    // Hard-cap profile density to avoid huge vertical face counts
+    const MAX_PROFILE_POINTS = 400; // adjust as needed (lower => fewer vertical faces)
+    if (points.length > MAX_PROFILE_POINTS) {
+      const decimated = [];
+      for (let i = 0; i < MAX_PROFILE_POINTS; i++) {
+        const idx = Math.round((i / (MAX_PROFILE_POINTS - 1)) * (points.length - 1));
+        decimated.push(points[idx]);
+      }
+      points = decimated;
+      console.warn(`[Lathe] Decimated profile to ${points.length} points`);
+    }
+
+    // Before creating LatheGeometry (right above new THREE.LatheGeometry)
+    const MAX_VERTS = 80000; // tighter safety cap
+    let radialSegments = 128;  // lower default => fewer radial faces
+    let estVerts = (points?.length || 0) * radialSegments;
+    if (estVerts > MAX_VERTS && points?.length) {
+      radialSegments = Math.max(12, Math.floor(MAX_VERTS / points.length));
+      estVerts = points.length * radialSegments;
+      console.warn(`[Lathe] radialSegments -> ${radialSegments} to keep verts under ${MAX_VERTS}`);
+    }
+
     // Create geometry using LatheGeometry
-    const geometry = new THREE.LatheGeometry(points, 128);
+    const geometry = new THREE.LatheGeometry(points, radialSegments);
     geometry.translate(0, -height / 2, 0);
 
     // Add surface roughness using deterministic noise
@@ -152,11 +220,13 @@ const Cylinder = ({
     if (showMesh) {
       const material = new THREE.MeshStandardMaterial({
         color: strokeColor || 0x888888,
-        metalness: 0.1,
-        roughness: 0.8,
+        metalness: metalness,
+        roughness: materialRoughness,
         side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.8,
+        transparent: opacity < 1,
+        opacity: opacity,
+        wireframe: wireframeMode,
+        flatShading: flatShading,
       });
       const mesh = new THREE.Mesh(geometry, material);
       scene.add(mesh);
@@ -172,7 +242,7 @@ const Cylinder = ({
 
     // Animation Loop
     const animate = () => {
-      requestAnimationFrame(animate);
+      rafRef.current = requestAnimationFrame(animate); // store id
       controls.update();
       renderer.render(scene, camera);
     };
@@ -180,6 +250,8 @@ const Cylinder = ({
 
     // Cleanup
     return () => {
+      cancelAnimationFrame(rafRef.current); // stop loop
+      rafRef.current = 0;
       renderer.dispose();
       mount.removeChild(renderer.domElement);
     };
@@ -223,6 +295,8 @@ const Cylinder = ({
       // Sort by Y coordinate to ensure proper order
       validPoints.sort((a, b) => a.y - b.y);
 
+      // COMMENT OUT this block to preserve original Y proportions:
+      /*
       // Normalize Y coordinates to 0-100 range
       const minY = Math.min(...validPoints.map(p => p.y));
       const maxY = Math.max(...validPoints.map(p => p.y));
@@ -233,6 +307,7 @@ const Cylinder = ({
           ((point.y - minY) / (maxY - minY)) * 100
         ));
       }
+      */
 
       // For lathe geometry, ensure the profile starts and ends at the center axis (x=0)
       // Add center point at bottom if needed
@@ -249,7 +324,35 @@ const Cylinder = ({
       return validPoints;
     }
 
-  }, [diameter, height, thickness, strokeColor, showMesh, roughness, zoom, customProfile]);
+    function addAspectDebugBox(profilePoints) {
+      if (!profilePoints.length) return;
+      const maxR = Math.max(...profilePoints.map(p => p.x));
+      const minY = Math.min(...profilePoints.map(p => p.y));
+      const maxY = Math.max(...profilePoints.map(p => p.y));
+
+      // Simple rectangle outline (in X/Y plane at Z= - (diameter) just to push it back)
+      const boxGeom = new THREE.BufferGeometry();
+      const verts = new Float32Array([
+        0, minY, 0,
+        maxR, minY, 0,
+        maxR, minY, 0,
+        maxR, maxY, 0,
+        maxR, maxY, 0,
+        0, maxY, 0,
+        0, maxY, 0,
+        0, minY, 0,
+      ]);
+      boxGeom.setAttribute('position', new THREE.BufferAttribute(verts, 3));
+      const boxMat = new THREE.LineBasicMaterial({ color: 0xff0000 });
+      const boxLines = new THREE.LineSegments(boxGeom, boxMat);
+      boxLines.name = 'aspectDebugBox';
+      scene.add(boxLines);
+    }
+
+    // After points = validateAndFixProfile(points);
+    addAspectDebugBox(points);
+
+  }, [diameter, height, thickness, strokeColor, showMesh, roughness, zoom, customProfile, opacity, metalness, materialRoughness, wireframeMode, flatShading]);
 
   return <div ref={mountRef} style={{ width: '100%', height: '100%' }} />;
 };
