@@ -4,13 +4,14 @@ import SliderWithInput from './components/SliderWithInput';
 import ContainerSVG from './components/ContainerSVG';
 import Cylinder from './components/Cylinder'; // Import the new Cylinder component
 import SVGImporter from './components/SVGImporter';
+import ProfileEditor from './components/ProfileEditor';
 
 function App() {
   const [volume, setVolume] = useState(1000);
   const [height, setHeight] = useState(100);
   const [diameter, setDiameter] = useState(112.8);
   const [thickness, setThickness] = useState(1); // Combined thickness state
-  const [activeView, setActiveView] = useState('3D'); // '3D' or '2D'
+  const [activeView, setActiveView] = useState('3D'); // '2D' | '3D' | 'DRAW'
   const [strokeColor, setStrokeColor] = useState('#363636');
   const [pathStrokeColor, setPathStrokeColor] = useState('#363636');
   const [zoom, setZoom] = useState(1);
@@ -94,6 +95,14 @@ function App() {
     console.log('App.js - customProfile state set to:', points);
   }, []);
 
+  const handleProfileFromEditor = useCallback((pathData) => {
+    const { svgPathToPoints, normalizeProfile } = require('./utils/svgProfile');
+    const { points } = svgPathToPoints(pathData);
+    const norm = normalizeProfile(points);
+    setCustomProfile(norm);
+    setActiveView('3D');
+  }, []);
+
   return (
     <div className="App">
       <div className="container">
@@ -101,7 +110,9 @@ function App() {
           transform: activeView === '2D' ? `scale(${zoom})` : 'none',
           transformOrigin: 'center center'
         }}>
-          {activeView === '2D' ? (
+          {activeView === 'DRAW' ? (
+            <ProfileEditor onApply={handleProfileFromEditor} onCancel={() => setActiveView('3D')} />
+          ) : activeView === '2D' ? (
             <div className="svg-container">
               <ContainerSVG
                 height={height}
@@ -245,16 +256,13 @@ function App() {
               />
               <span className="color-value">{strokeColor}</span>
             </div>
-            <div className="switch-wrapper">
-              <label className="switch">
-                <input
-                  type="checkbox"
-                  checked={activeView === '3D'}
-                  onChange={toggleView}
-                />
-                <span className="slider round"></span>
-              </label>
-              <span className="switch-label">{activeView === '3D' ? '3D' : '2D'}</span>
+          </div>
+          <div className="control-group">
+            <label>View</label>
+            <div>
+              <label><input type="radio" checked={activeView === '2D'} onChange={() => setActiveView('2D')} /> 2D</label>
+              <label style={{ marginLeft: 12 }}><input type="radio" checked={activeView === '3D'} onChange={() => setActiveView('3D')} /> 3D</label>
+              <label style={{ marginLeft: 12 }}><input type="radio" checked={activeView === 'DRAW'} onChange={() => setActiveView('DRAW')} /> Draw</label>
             </div>
           </div>
           <div className="control-group">

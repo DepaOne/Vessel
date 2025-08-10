@@ -1,0 +1,79 @@
+.profile-editor {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #fafafa;
+    overflow: hidden;
+}
+
+.profile-editor .toolbar {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    gap: 8px;
+    z-index: 2;
+}
+
+.profile-editor .toolbar button {
+    padding: 6px 10px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.profile-editor .toolbar button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.editor-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: repeating-linear-gradient(0deg,
+            #ffffff,
+            #ffffff 24px,
+            #f3f3f3 24px,
+            #f3f3f3 25px),
+        repeating-linear-gradient(90deg,
+            transparent,
+            transparent 24px,
+            rgba(0, 0, 0, 0.04) 24px,
+            rgba(0, 0, 0, 0.04) 25px);
+}
+
+.path-preview {
+    stroke: #444;
+    stroke-width: 2;
+    fill: none;
+    vector-effect: non-scaling-stroke;
+}
+
+.handle-line {
+    stroke: #9ccaff;
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+}
+
+.handle {
+    fill: #9ccaff;
+    cursor: pointer;
+}
+
+.anchor {
+    fill: #0a6cff;
+    cursor: pointer;
+}
+
+.anchor.selected {
+    fill: #ff6a00;
+}
+
+.guide-line {
+    stroke: #aaa;
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+}
