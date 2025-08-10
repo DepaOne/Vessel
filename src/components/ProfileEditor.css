@@ -2,7 +2,8 @@
     position: relative;
     width: 100%;
     height: 100%;
-    background: #fafafa;
+    background: var(--app-bg);
+    color: var(--color-text, #363636);
     overflow: hidden;
 }
 
@@ -13,13 +14,19 @@
     display: flex;
     gap: 8px;
     z-index: 2;
+    background: var(--toolbar-bg, #ffffff);
+    border: 1px solid var(--toolbar-border, #cccccc);
+    border-radius: 6px;
+    padding: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .profile-editor .toolbar button {
     padding: 6px 10px;
     font-size: 12px;
-    border: 1px solid #ccc;
-    background: #fff;
+    border: 1px solid var(--color-border, #cccccc);
+    background: var(--button-bg, #ffffff);
+    color: var(--button-text, #222222);
     border-radius: 4px;
     cursor: pointer;
 }
@@ -33,47 +40,48 @@
     width: 100%;
     height: 100%;
     display: block;
-    background: repeating-linear-gradient(0deg,
-            #ffffff,
-            #ffffff 24px,
-            #f3f3f3 24px,
-            #f3f3f3 25px),
+    background:
+        repeating-linear-gradient(0deg,
+            var(--app-bg, #ffffff),
+            var(--app-bg, #ffffff) 24px,
+            var(--grid-minor, #f3f3f3) 24px,
+            var(--grid-minor, #f3f3f3) 25px),
         repeating-linear-gradient(90deg,
             transparent,
             transparent 24px,
-            rgba(0, 0, 0, 0.04) 24px,
-            rgba(0, 0, 0, 0.04) 25px);
+            var(--grid-major, rgba(0, 0, 0, 0.04)) 24px,
+            var(--grid-major, rgba(0, 0, 0, 0.04)) 25px);
 }
 
 .path-preview {
-    stroke: #444;
+    stroke: var(--path-stroke, #444444);
     stroke-width: 2;
     fill: none;
     vector-effect: non-scaling-stroke;
 }
 
 .handle-line {
-    stroke: #9ccaff;
+    stroke: var(--handle-color, #9ccaff);
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
 }
 
 .handle {
-    fill: #9ccaff;
+    fill: var(--handle-color, #9ccaff);
     cursor: pointer;
 }
 
 .anchor {
-    fill: #0a6cff;
+    fill: var(--anchor-color, #0a6cff);
     cursor: pointer;
 }
 
 .anchor.selected {
-    fill: #ff6a00;
+    fill: var(--anchor-selected, #ff6a00);
 }
 
 .guide-line {
-    stroke: #aaa;
+    stroke: var(--guide-stroke, #aaaaaa);
     stroke-width: 1;
     vector-effect: non-scaling-stroke;
 }

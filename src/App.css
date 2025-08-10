@@ -1,8 +1,8 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: #f0e9e7;
-  /* Main app background */
+  background-color: var(--app-bg);
+  color: var(--text);
   font-family: 'HKGrotesk', sans-serif;
 }
 
@@ -12,8 +12,7 @@ body {
   align-items: center;
   height: 100vh;
   width: 100vw;
-  background-color: #f0e9e7;
-  /* Ensure App also has the background */
+  background-color: var(--app-bg);
 }
 
 .container {
@@ -44,9 +43,8 @@ body {
   width: 300px;
   padding: 20px;
   overflow-y: auto;
-  background: #f0e9e7;
-  /* Same as app background */
-  border: 0.75px solid #acacac;
+  background: var(--panel-bg);
+  border: 0.75px solid var(--panel-border);
   border-radius: 0px;
   position: fixed;
   right: 20px;
@@ -54,7 +52,6 @@ body {
   bottom: 20px;
   box-sizing: border-box;
   z-index: 10;
-  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
 }
 
 .slider-with-input {
@@ -82,284 +79,168 @@ body {
   flex: 1;
   margin-right: 10px;
   -webkit-appearance: none;
-  /* Remove default appearance */
+  appearance: none;
   width: 50%;
   height: 0.5px;
-  /* Slider track height */
-  background: #363636;
-  /* Slider track color */
+  background: var(--slider-track);
   outline: none;
   border-radius: 5px;
-  /* Rounded corners for the track */
 }
+
+/* Remove stray line if present:
+   -webkit-appearance
+*/
 
 /* Styling for the slider thumb */
 .slider-with-input input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 4px;
-  /* Thumb width */
   height: 12px;
-  /* Thumb height */
-  background: #1b1b1b;
-  /* Thumb color */
+  background: var(--slider-thumb);
   cursor: pointer;
   border-radius: 0%;
-  /* Circular thumb */
 }
-
 .slider-with-input input[type="range"]::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  background: #4CAF50;
+  width: 4px;
+  height: 12px;
+  background: var(--slider-thumb);
   cursor: pointer;
-  border-radius: 50%;
+  border-radius: 0%;
 }
 
-/* Styling for the number input */
+/* Number input */
 .slider-with-input input[type="number"] {
   width: 48px;
   padding: 5px;
-  border: 0px solid #ddd;
-  background-color: #e8e8e8;
-  /* Light gray background */
-  color: #363636;
-  /* Dark text color for contrast */
+  border: 0px solid var(--input-border);
+  background-color: var(--input-bg);
+  color: var(--text);
   border-radius: 0px;
   font-size: 12px;
   text-align: left;
 }
 
-/* Hover effects */
+/* Hover + focus */
 .slider-with-input input[type="range"]:hover {
-  background: #ccc;
+  background: var(--slider-track-hover);
 }
-
-.slider-with-input input[type="number"]:hover {
-  border-color: #999;
-}
-
-/* Focus effects */
 .slider-with-input input[type="range"]:focus {
-  background: #bbb;
+  background: var(--slider-track-focus);
 }
-
+.slider-with-input input[type="number"]:hover {
+  border-color: var(--input-border);
+}
 .slider-with-input input[type="number"]:focus {
-  border-color: #4CAF50;
+  border-color: var(--input-border);
   outline: none;
 }
 
-body,
-input,
-button {
-  font-family: 'HKGrotesk', sans-serif;
-}
+/* ...existing typography code... */
 
 .controls button {
   width: 100%;
   padding: 10px;
   margin-bottom: 20px;
-  background-color: #f0e9e7;
-  color: white;
-  border: none;
+  background-color: var(--panel-bg);
+  color: var(--text);
+  border: 1px solid var(--panel-border);
   border-radius: 0px;
   cursor: pointer;
   font-size: 12px;
 }
 
 .controls button:hover {
-  background-color: #f0e9e7;
+  background-color: var(--panel-bg);
+  filter: brightness(0.98);
 }
 
+/* View toggle button uses primary tokens */
 .view-toggle-button {
-  /* Basic styling */
   width: 100%;
   padding: 12px 20px;
   margin-top: 20px;
   font-size: 12px;
   font-weight: bold;
-
-
   text-transform: uppercase;
 
-  /* Colors */
-  background-color: rgb(65, 65, 65);
-  color: #363636 !important;
-  /* Dark gray color */
+  background-color: var(--btn-primary-bg);
+  color: var(--btn-primary-text) !important;
 
-  /* Border and shape */
   border: none;
   border-radius: 0%;
-
-  /* Cursor */
   cursor: pointer;
-
-  /* Transition for smooth hover effect */
   transition: all 0.3s ease;
-
-  /* Box shadow for depth */
   box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.2);
 }
-
-/* Hover effect */
 .view-toggle-button:hover {
-  background-color: #363636;
-
+  background-color: var(--btn-primary-bg-hover);
   box-shadow: 0 2px 4px rgba(41, 41, 41, 0.3);
 }
-
-/* Active/Click effect */
 .view-toggle-button:active {
-  background-color: #363636;
+  background-color: var(--btn-primary-bg-hover);
   box-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.1);
   transform: translateY(1px);
 }
 
-/* Focus style for accessibility */
-.view-toggle-button:focus {
-  outline: none;
-  box-shadow: 0 0 0.5 1.5px rgba(143, 143, 143, 0.1);
-}
-
+/* App header */
 .app-header {
   font-family: 'HKGrotesk-Bold', sans-serif;
   font-size: 18px;
-  color: #363636;
+  color: var(--text);
   text-align: left;
   margin-bottom: 20px;
   padding-bottom: 20px;
   letter-spacing: 0.1em;
 }
 
-.switch-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  /* Aligns content to the left */
-  margin-top: 20px;
-}
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 40px;
-  /* Reduced from typical 60px */
-  height: 22px;
-  /* Reduced from typical 34px */
-  border: none !important;
-  outline: none !important;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-  border: none !important;
-  outline: none !important;
-}
-
+/* Switch */
+.switch { /* ...existing geometry... */ }
 .slider {
   position: absolute;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--switch-bg);
   transition: .4s;
   border: none !important;
   outline: none !important;
 }
-
 .slider:before {
   position: absolute;
   content: "";
   height: 18px;
-  /* Reduced from typical 26px */
   width: 18px;
-  /* Reduced from typical 26px */
   left: 2px;
-  /* Adjusted for smaller switch */
   bottom: 2px;
-  /* Adjusted for smaller switch */
-  background-color: white;
+  background-color: var(--switch-knob);
   transition: .4s;
 }
-
-input:checked+.slider {
-  background-color: #c6c6c6;
-}
-
-input:checked+.slider:before {
-  transform: translateX(18px);
-  /* Adjusted for smaller switch */
-}
-
-.slider.round {
-  border-radius: 22px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
+input:checked + .slider {
+  background-color: var(--switch-active-bg);
 }
 
 .switch-label {
   margin-left: 12px;
   font-size: 12px;
-  /* Adjust as needed */
-  color: #363636;
+  color: var(--text);
   font-weight: 400;
   vertical-align: middle;
 }
 
-.control-group {
-  margin-bottom: 20px;
-  margin-top: 20px;
-}
-
-.control-group label {
-  display: block;
-  margin-bottom: 10px;
-  font-weight: 400;
-  font-size: 12px;
-  color: #363636;
-}
-
-.color-picker-wrapper {
-  display: flex;
-  align-items: center;
-}
-
-input[type="color"] {
-  border-color: none;
-  border-width: 0px;
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-
-input[type="color"]::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-
-input[type="color"]::-webkit-color-swatch {
-  border: none;
-  border-radius: 0px;
-}
-
+/* Color input + value */
 .color-value {
   margin-left: 10px;
   font-weight: 100;
   font-size: 12px;
-  color: #363636;
+  color: var(--text);
 }
 
-/* Update the SVG stroke color */
+/* SVG default stroke */
 .svg-container svg {
-  stroke: var(--svg-stroke-color, #363636);
+  stroke: var(--svg-stroke-color, var(--text));
 }
 
-.switch input:focus {
+switch input:focus {
   outline: none;
 }
 

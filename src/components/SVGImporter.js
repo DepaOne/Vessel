@@ -429,28 +429,6 @@ const SVGImporter = ({ onProfileImported }) => {
             >
                 Import SVG Profile
             </button>
-            <button
-                onClick={() => {
-                    // Test with a simple vase shape
-                    const testPoints = [
-                        { x: 0, y: 0 },
-                        { x: 50, y: 0 },
-                        { x: 100, y: 100 }
-                    ];
-                    onProfileImported(testPoints);
-                }}
-                style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#333',  // Changed from '#28a745' to match first button
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    marginLeft: '0px'
-                }}
-            >
-                Test Vase Shape
-            </button>
             {svgContent && (
                 <div style={{ marginTop: '8px', fontSize: '12px', color: '#333' }}>
                     SVG imported successfully

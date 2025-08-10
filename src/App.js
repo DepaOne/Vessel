@@ -1,28 +1,101 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import './styles/theme.css';
 import './App.css';
 import SliderWithInput from './components/SliderWithInput';
 import ContainerSVG from './components/ContainerSVG';
-import Cylinder from './components/Cylinder'; // Import the new Cylinder component
+import Cylinder from './components/Cylinder';
 import SVGImporter from './components/SVGImporter';
 import ProfileEditor from './components/ProfileEditor';
+import { serializeProject, deserializeProject } from './utils/saveLoad';
 
 function App() {
   const [volume, setVolume] = useState(1000);
   const [height, setHeight] = useState(100);
   const [diameter, setDiameter] = useState(112.8);
-  const [thickness, setThickness] = useState(1); // Combined thickness state
-  const [activeView, setActiveView] = useState('3D'); // '2D' | '3D' | 'DRAW'
+  const [thickness, setThickness] = useState(1);
+  const [activeView, setActiveView] = useState('3D');
   const [strokeColor, setStrokeColor] = useState('#363636');
   const [pathStrokeColor, setPathStrokeColor] = useState('#363636');
   const [zoom, setZoom] = useState(1);
   const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [showMesh, setShowMesh] = useState(false);
-  const [roughness, setRoughness] = useState(0.00); // Add this line
-  const [customProfile, setCustomProfile] = useState(null);
+  const [roughness, setRoughness] = useState(0.00);
+  const [customProfile, setCustomProfile] = useState(null); // expect { type:'svg-path', d: '...' }
   const [opacity, setOpacity] = useState(0.8);
   const [metalness, setMetalness] = useState(0.1);
   const [materialRoughness, setMaterialRoughness] = useState(0.8);
   const [flatShading, setFlatShading] = useState(false);
+
+  // Editor preferences (optional if you store them globally)
+  const [mirror, setMirror] = useState(true);
+  const [lockRight, setLockRight] = useState(true);
+
+  // Save to file
+  const saveProject = useCallback(() => {
+    const data = serializeProject({
+      customProfile,
+      mirror, lockRight,
+      volume, height, diameter, thickness,
+      activeView, zoom, showMesh, viewport,
+      opacity, metalness, materialRoughness, flatShading,
+      strokeColor, pathStrokeColor,
+    });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const ts = new Date().toISOString().replace(/[:.]/g, '-');
+    a.href = url;
+    a.download = `vessel-${ts}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [
+    customProfile, mirror, lockRight,
+    volume, height, diameter, thickness,
+    activeView, zoom, showMesh, viewport,
+    opacity, metalness, materialRoughness, flatShading,
+    strokeColor, pathStrokeColor
+  ]);
+
+  // Load from file
+  const fileInputRef = useRef(null);
+  const requestLoad = () => fileInputRef.current?.click();
+  const handleLoadFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const json = JSON.parse(text);
+      const patch = deserializeProject(json);
+
+      // Apply to state
+      setCustomProfile(patch.customProfile);
+      setMirror(patch.mirror);
+      setLockRight(patch.lockRight);
+
+      setVolume(patch.volume);
+      setHeight(patch.height);
+      setDiameter(patch.diameter);
+      setThickness(patch.thickness);
+
+      setActiveView(patch.activeView);
+      setZoom(patch.zoom);
+      setShowMesh(patch.showMesh);
+      if (patch.viewport) setViewport(patch.viewport);
+
+      setOpacity(patch.opacity);
+      setMetalness(patch.metalness);
+      setMaterialRoughness(patch.materialRoughness);
+      setFlatShading(patch.flatShading);
+
+      setStrokeColor(patch.strokeColor);
+      setPathStrokeColor(patch.pathStrokeColor);
+    } catch (err) {
+      console.error('Load failed:', err);
+      alert('Failed to load project: ' + err.message);
+    } finally {
+      e.target.value = ''; // allow re-selecting same file
+    }
+  };
 
   const updateFromVolume = (newVolume) => {
     const oldVolume = (Math.PI * Math.pow(diameter / 20, 2) * height / 10);
@@ -105,6 +178,15 @@ function App() {
 
   return (
     <div className="App">
+      {/* Hidden input for loading */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="application/json"
+        onChange={handleLoadFile}
+        style={{ display: 'none' }}
+      />
+
       <div className="container">
         <div className="visualization-container" style={{
           transform: activeView === '2D' ? `scale(${zoom})` : 'none',
@@ -285,6 +367,8 @@ function App() {
               Flat Shading
             </label>
           </div>
+          <button onClick={saveProject}>Save Project</button>
+          <button onClick={requestLoad}>Load Project</button>
         </div>
       </div>
     </div>
